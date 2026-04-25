@@ -1,5 +1,4 @@
-
-interface EventMap {
+export interface EventMap {
   userLogin: { userId: string; timestamp: number };
   logout: void;
   dataReceived: { content: string; length: number };
