@@ -31,7 +31,10 @@ class ServiceBus<TEventMap> {
 
     return id;
   }
+
+
   private unsubscribe<K extends keyof TEventMap>(message: K, id: string) {
+
     if (!this.subscriptionRegistry[message] || !this.subscriptionRegistry[message][id]) {
       return;
     };
@@ -39,5 +42,21 @@ class ServiceBus<TEventMap> {
 
     delete this.subscriptionRegistry[message][id];
     console.log(this.subscriptionRegistry[message])
+  }
+
+
+  private publish<K extends keyof TEventMap>(message: K, payload: TEventMap[K]) {
+
+    if (!this.subscriptionRegistry[message]) {
+      throw new Error(`Message type: ${message as string} not found`);
+    }
+
+    Object.values(this.subscriptionRegistry[message]).forEach((fn) => {
+      fn(payload);
+      // what happens if one of these fails?
+    })
+
+
+
   }
 }
