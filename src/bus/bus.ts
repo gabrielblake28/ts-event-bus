@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
-
 type Listener<T> = (payload: T) => void;
 
 type SubscriptionRegistry<TEventMap> = {
@@ -18,10 +16,11 @@ export class ServiceBus<TEventMap> {
   // 7. Cleanup / Lifecycle — remove listeners, dispose the bus
 
   subscriptionRegistry: SubscriptionRegistry<TEventMap> = {};
+  private idCounter = 0;
 
   subscribe<K extends keyof TEventMap>(message: K, fn: (data: TEventMap[K]) => void): string {
 
-    const id: string = uuidv4();
+    const id: string = String(++this.idCounter);
 
     if (!this.subscriptionRegistry[message]) {
       this.subscriptionRegistry[message] = { [id]: fn };
@@ -29,7 +28,6 @@ export class ServiceBus<TEventMap> {
       this.subscriptionRegistry[message][id] = fn;
     }
 
-    console.log(`Subscription (${id}) added to ${String(message)} registry`, this.subscriptionRegistry[message])
     return id;
   }
 
@@ -43,7 +41,6 @@ export class ServiceBus<TEventMap> {
 
     delete this.subscriptionRegistry[message][id];
     if (Object.keys(this.subscriptionRegistry[message]).length <= 0) delete this.subscriptionRegistry[message];
-    console.log(this.subscriptionRegistry[message])
     return true;
   }
 
