@@ -4,13 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
+    "example:basic": "tsx examples/basic-usage.ts",
+    "example:multi": "tsx examples/multiple-subscribers.ts",
+    "example:errors": "tsx examples/error-handling.ts",
+    "example:types": "tsx examples/type-safety.ts",
+    "examples": "pnpm run example:basic && pnpm run example:multi && pnpm run example:errors && pnpm run example:types",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.15.0",
-  "dependencies": {
-    "uuid": "^14.0.0"
+  "devDependencies": {
+    "tsx": "^4.0.0"
   }
 }
