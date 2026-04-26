@@ -31,4 +31,13 @@ class ServiceBus<TEventMap> {
 
     return id;
   }
+  private unsubscribe<K extends keyof TEventMap>(message: K, id: string) {
+    if (!this.subscriptionRegistry[message] || !this.subscriptionRegistry[message][id]) {
+      return;
+    };
+
+
+    delete this.subscriptionRegistry[message][id];
+    console.log(this.subscriptionRegistry[message])
+  }
 }
