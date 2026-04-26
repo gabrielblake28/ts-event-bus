@@ -38,7 +38,6 @@ export class ServiceBus<TEventMap> {
       return false;
     };
 
-
     delete this.subscriptionRegistry[message][id];
     if (Object.keys(this.subscriptionRegistry[message]).length <= 0) delete this.subscriptionRegistry[message];
     return true;
