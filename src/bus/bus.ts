@@ -7,7 +7,7 @@ type SubscriptionRegistry<TEventMap> = {
 };
 
 
-class ServiceBus<TEventMap> {
+export class ServiceBus<TEventMap> {
 
   // 1. Subscription Registry — who is listening to what
   // 2. Core Bus Engine — publish, subscribe, unsubscribe
@@ -17,9 +17,9 @@ class ServiceBus<TEventMap> {
   // 6. Public API Surface — the class/function users actually instantiate
   // 7. Cleanup / Lifecycle — remove listeners, dispose the bus
 
-  private subscriptionRegistry: SubscriptionRegistry<TEventMap> = {};
+  subscriptionRegistry: SubscriptionRegistry<TEventMap> = {};
 
-  private subscribe<K extends keyof TEventMap>(message: K, fn: (data: TEventMap[K]) => {}) {
+  subscribe<K extends keyof TEventMap>(message: K, fn: (data: TEventMap[K]) => void): string {
 
     const id: string = uuidv4();
 
@@ -29,34 +29,37 @@ class ServiceBus<TEventMap> {
       this.subscriptionRegistry[message][id] = fn;
     }
 
+    console.log(`Subscription (${id}) added to ${String(message)} registry`, this.subscriptionRegistry[message])
     return id;
   }
 
 
-  private unsubscribe<K extends keyof TEventMap>(message: K, id: string) {
+  unsubscribe<K extends keyof TEventMap>(message: K, id: string): boolean {
 
     if (!this.subscriptionRegistry[message] || !this.subscriptionRegistry[message][id]) {
-      return;
+      return false;
     };
 
 
     delete this.subscriptionRegistry[message][id];
+    if (Object.keys(this.subscriptionRegistry[message]).length <= 0) delete this.subscriptionRegistry[message];
     console.log(this.subscriptionRegistry[message])
+    return true;
   }
 
 
-  private publish<K extends keyof TEventMap>(message: K, payload: TEventMap[K]) {
+  publish<K extends keyof TEventMap>(messageType: K, payload: TEventMap[K]) {
 
-    if (!this.subscriptionRegistry[message]) {
-      throw new Error(`Message type: ${message as string} not found`);
+    if (!this.subscriptionRegistry[messageType]) {
+      return;
     }
 
-    Object.values(this.subscriptionRegistry[message]).forEach((fn) => {
-      fn(payload);
-      // what happens if one of these fails?
-    })
-
-
-
-  }
+    for (const [id, fn] of Object.entries(this.subscriptionRegistry[messageType])) {
+      try {
+        fn(payload);
+      } catch (e) {
+        console.log(`subscription ${id} action failed`)
+      }
+    }
+  };
 }
